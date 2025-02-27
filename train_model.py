@@ -1,12 +1,12 @@
 if __name__ == "__main__":
-    from my_env import build_rlgym_v2_env
     from rlgym_ppo import Learner
     from utils import AdaptiveLearnerWrapper
     import torch
     import wandb
+    from my_env import build_rlgym_v2_env
 
     load_run = False
-    run_name = "Test3_trial"
+    run_name = "Test3_adaptive_lr_test"
     run_id = None
     use_adaptive_lr = True
     load_weights_manually = False
@@ -35,8 +35,8 @@ if __name__ == "__main__":
         "exp_buffer_size": 300_000, # size of experience buffer - keep this 2 - 3x the batch size
         "ppo_minibatch_size": 50_000, # minibatch size - set this less than or equal to the batch size
         "ppo_ent_coef": 0.01, # entropy coefficient - this determines the impact of exploration on the policy
-        "policy_lr": 1e-4, # policy learning rate
-        "critic_lr": 1e-4, # value function learning rate
+        "policy_lr": 2e-4, # policy learning rate
+        "critic_lr": 2e-4, # value function learning rate
         "ppo_epochs": 2,   # number of PPO epochs
         "standardize_returns": True,
         "standardize_obs": False,

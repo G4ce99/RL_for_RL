@@ -2,37 +2,9 @@ from typing import List, Dict, Any
 from rlgym.api import RewardFunction, AgentID
 from rlgym.rocket_league.api import GameState
 from rlgym.rocket_league import common_values
-from utils import AdaptiveLearnerWrapper
 import numpy as np
 
 # Custom Reward Functions that I wrote
-class AdapativeLearningRateReward(RewardFunction[AgentID, GameState, float]):
-    """
-    A reward that dynamically adjusts the model learning rate (DONE BUT NOT TESTED)
-    Learning rate calculated by max_lr * gamma ^ (alpha*cumulative_ts)
-    """
-    def __init__(self, alpha=1e-8, gamma=0.91):
-        super().__init__()
-        self.max_policy_lr = None
-        self.max_critic_lr = None
-        self.alpha = alpha
-        self.gamma = gamma
-    
-    def reset(self, agents: List[AgentID], initial_state: GameState, shared_info: Dict[str, Any]) -> None:
-        pass
-    
-    def get_rewards(self, agents: List[AgentID], state: GameState, is_terminated: Dict[AgentID, bool],
-                    is_truncated: Dict[AgentID, bool], shared_info: Dict[str, Any]) -> Dict[AgentID, float]:
-        if AdaptiveLearnerWrapper.learner is not None:
-            if self.max_policy_lr is None:
-                self.max_policy_lr = AdaptiveLearnerWrapper.learner.policy_lr
-                self.max_critic_lr = AdaptiveLearnerWrapper.learner.critic_lr
-            scaling_factor = (self.gamma ** (self.alpha * AdaptiveLearnerWrapper.learner.agent.cumulative_timesteps))
-            policy_lr = self.max_policy_lr * scaling_factor
-            critic_lr = self.max_critic_lr * scaling_factor
-            self.learner_wrapper.learner.update_learning_rate(new_policy_lr=policy_lr, new_critic_lr=critic_lr)
-        return {agent: 0. for agent in agents}
-
 class FaceBallReward(RewardFunction[AgentID, GameState, float]):
     """
     Rewards the agent for facing the ball (DONE NOT TESTED)
@@ -50,7 +22,7 @@ class FaceBallReward(RewardFunction[AgentID, GameState, float]):
             ball_physics = state.ball if car.is_orange else state.inverted_ball
             vector_to_ball = ball_physics.position - car_physics.position
             dir_to_ball = vector_to_ball * (1/np.linalg.norm(vector_to_ball))
-            forward_vector = car_physics.forward()
+            forward_vector = car_physics.forward
             forward_dir = forward_vector * (1/np.linalg.norm(forward_vector))
             rewards[agent] = np.dot(dir_to_ball, forward_dir)
         

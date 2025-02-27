@@ -12,7 +12,7 @@ def build_env():
 
     from reward import (SpeedTowardBallReward, InAirReward, VelocityBallToGoalReward, GoalReward, TouchReward,
                         ChallengeBallReward, BallGoalDistanceReward, FaceBallReward, HitBallInAirTowardsGoalReward, AdvancedTouchReward, 
-                        BoostChangeReward, BoostKeepReward, TeamSpiritRewardWrapper, AdapativeLearningRateReward)
+                        BoostChangeReward, BoostKeepReward, TeamSpiritRewardWrapper)
 
     spawn_opponents = True
     team_size = 2
@@ -36,7 +36,6 @@ def build_env():
         (BallGoalDistanceReward(), 1),
         # (HitBallInAirTowardsGoalReward(), 0.2),
         (FaceBallReward(), 0.005),
-        (AdapativeLearningRateReward(), 0),
         (BoostChangeReward(), 0.6),
         (BoostKeepReward(), 0.4)
     )
