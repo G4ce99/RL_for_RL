@@ -10,8 +10,15 @@ from my_env import build_rlgym_v2_env
 
 class AdaptiveLearnerWrapper(MetricsLogger):
     """
-    Notes to self: Someone on discord suggested to make a reward function. I found this way to be far simpler and more flexible.
+    Notes to self: 
+    Someone on discord suggested to make a reward function. 
+    I found this way to be far simpler and more flexible.
     It instead updates learning rates during reporting phase of current iteration. 
+
+    ENSURE FOLLOWING: 
+    If continuing from a previous run, ensure that you set load_run param to true and set the run_id. 
+    Otherwise, incorrect behavior is encurred since we retrieve the initial cumulative_ts from the run. 
+    TODO: Not most important but find way to retrieve cumulative_ts from the checkpoint itself
     
     Learning rate calculated by max_lr * gamma ^ (alpha*cumulative_ts)
     Alpha and gamma set up for what I think is good distribution for 
