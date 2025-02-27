@@ -10,7 +10,8 @@ from my_env import build_rlgym_v2_env
 
 class AdaptiveLearnerWrapper(MetricsLogger):
     """
-    Notes to self: Someone on discord suggested to make a reward function. I found this way to be far simpler
+    Notes to self: Someone on discord suggested to make a reward function. I found this way to be far simpler and more flexible.
+    It instead updates learning rates during reporting phase of current iteration. 
     
     Learning rate calculated by max_lr * gamma ^ (alpha*cumulative_ts)
     Alpha and gamma set up for what I think is good distribution for 
@@ -35,11 +36,14 @@ class AdaptiveLearnerWrapper(MetricsLogger):
         else:
             timestep_cnt = 0
             cumulative_ts = 0
-
+        policy_lr, critic_lr = self.calculate_learning_rates(cumulative_ts)
+        return policy_lr, critic_lr, timestep_cnt
+    
+    def calculate_learning_rates(self, cumulative_ts):
         scaling_factor = (self.gamma ** (self.alpha * cumulative_ts))
         policy_lr = self.max_policy_lr * scaling_factor
         critic_lr = self.max_critic_lr * scaling_factor
-        return policy_lr, critic_lr, timestep_cnt
+        return policy_lr, critic_lr
 
     def _collect_metrics(self, game_state):
         return np.array([])
@@ -50,13 +54,11 @@ class AdaptiveLearnerWrapper(MetricsLogger):
         wandb_run.log(metrics, step=self.timestep_cnt)
         self.timestep_cnt+=1
 
-        print("--------Current Learning Rate--------")
+        print("--------CURRENT LEARNING RATE--------")
         print(f"Policy learning rate: {self.learner.policy_lr}")
         print(f"Critic learning rate: {self.learner.critic_lr}")
         
-        scaling_factor = (self.gamma ** (self.alpha * cumulative_timesteps))
-        policy_lr = self.max_policy_lr * scaling_factor
-        critic_lr = self.max_critic_lr * scaling_factor
+        policy_lr, critic_lr = self.calculate_learning_rates(cumulative_timesteps)
         
         # Suppressing print statements since making my own. 
         with io.StringIO() as buffer, redirect_stdout(buffer):
