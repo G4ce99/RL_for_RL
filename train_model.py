@@ -6,7 +6,7 @@ if __name__ == "__main__":
     from my_env import build_rlgym_v2_env
 
     load_run = False
-    run_name = "Test3_adaptive_lr_test"
+    run_name = "Test3_adaptive_lr"
     run_id = None
     use_adaptive_lr = True
     load_weights_manually = False
