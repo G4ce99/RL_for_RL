@@ -13,8 +13,11 @@ class AdaptiveLearnerWrapper(MetricsLogger):
     """
     def __init__(self, alpha=1e-8, gamma=0.91, *args, **kwargs):
         self.learner = Learner(build_rlgym_v2_env, metrics_logger=self, **kwargs)
-        self.max_policy_lr = kwargs["policy_lr"]
-        self.max_critic_lr = kwargs["critic_lr"]
+        self.learner.policy_lr =  kwargs["policy_lr"]
+        self.learner.critic_lr =  kwargs["critic_lr"]
+        
+        self.max_policy_lr = self.learner.policy_lr
+        self.max_critic_lr = self.learner.critic_lr
         self.alpha = alpha
         self.gamma = gamma
         self.timestep_cnt = 0
@@ -28,7 +31,7 @@ class AdaptiveLearnerWrapper(MetricsLogger):
         wandb_run.log(metrics, step=self.timestep_cnt)
         self.timestep_cnt+=1
         
-        print("--------Current Learning Rate--------")
+        print("--------Next Learning Rate--------")
         scaling_factor = (self.gamma ** (self.alpha * self.learner.agent.cumulative_timesteps))
         policy_lr = self.max_policy_lr * scaling_factor
         critic_lr = self.max_critic_lr * scaling_factor
