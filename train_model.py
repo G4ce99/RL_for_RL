@@ -1,6 +1,6 @@
 if __name__ == "__main__":
     from rlgym_ppo import Learner
-    from utils import AdaptiveLearnerWrapper
+    from adapt_lr import AdaptiveLearnerWrapper
     import torch
     import wandb
     from my_env import build_rlgym_v2_env
