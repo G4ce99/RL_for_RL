@@ -54,7 +54,7 @@ class AdaptiveLearnerWrapper(MetricsLogger):
         print(f"Policy learning rate: {self.learner.policy_lr}")
         print(f"Critic learning rate: {self.learner.critic_lr}")
         
-        scaling_factor = (self.gamma ** (self.alpha * self.learner.agent.cumulative_timesteps))
+        scaling_factor = (self.gamma ** (self.alpha * cumulative_timesteps))
         policy_lr = self.max_policy_lr * scaling_factor
         critic_lr = self.max_critic_lr * scaling_factor
         
