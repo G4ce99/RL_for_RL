@@ -3,12 +3,16 @@ def build_env():
     from rlgym.rocket_league.action_parsers import LookupTableAction, RepeatAction
     from rlgym.rocket_league.done_conditions import GoalCondition, NoTouchTimeoutCondition, TimeoutCondition, AnyCondition
     from rlgym.rocket_league.obs_builders import DefaultObs
-    from rlgym.rocket_league.reward_functions import CombinedReward, GoalReward, TouchReward
+    from rlgym.rocket_league.reward_functions import CombinedReward
     from rlgym.rocket_league.rlviser import RLViserRenderer
     from rlgym.rocket_league.sim import RocketSimEngine
     from rlgym.rocket_league.state_mutators import MutatorSequence, FixedTeamSizeMutator, KickoffMutator
     from rlgym.rocket_league import common_values
     import numpy as np
+
+    from reward import (SpeedTowardBallReward, InAirReward, VelocityBallToGoalReward, GoalReward, TouchReward,
+                        ChallengeBallReward, BallGoalDistanceReward, FaceBallReward, HitBallInAirTowardsGoalReward, AdvancedTouchReward, 
+                        BoostChangeReward, BoostKeepReward, TeamSpiritRewardWrapper, AdapativeLearningRateReward)
 
     spawn_opponents = True
     team_size = 2
@@ -22,7 +26,20 @@ def build_env():
     termination_condition = GoalCondition()
     truncation_condition = AnyCondition(NoTouchTimeoutCondition(timeout_seconds=no_touch_timeout_seconds), TimeoutCondition(timeout_seconds=game_timeout_seconds))
 
-    reward_fn = CombinedReward((GoalReward(), 10), (TouchReward(), 0.1))
+    reward_fn = CombinedReward(
+        (GoalReward(), 40), 
+        (TouchReward(), 2),
+        (SpeedTowardBallReward(), 0.5), 
+        (InAirReward(), 0.01),
+        (VelocityBallToGoalReward(), 2),
+        (ChallengeBallReward(), 0.5),
+        (BallGoalDistanceReward(), 1),
+        # (HitBallInAirTowardsGoalReward(), 0.2),
+        (FaceBallReward(), 0.005),
+        (AdapativeLearningRateReward(), 0),
+        (BoostChangeReward(), 0.6),
+        (BoostKeepReward(), 0.4)
+    )
 
     obs_builder = DefaultObs(zero_padding=None,
                              pos_coef=np.asarray([1 / common_values.SIDE_WALL_X, 1 / common_values.BACK_NET_Y, 1 / common_values.CEILING_Z]),
