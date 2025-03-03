@@ -1,23 +1,37 @@
+# TODO's: 
+### MAKE THIS INTO A CLASS CALLED Model for multistage training
+### ALLOW SOME PARAMETERS TO BE LOADED FROM THE BOOK_KEEPING_VARS.json FILE INSTEAD OF BEING MANUALLY SET
+
 if __name__ == "__main__":
     from rlgym_ppo import Learner
     from adapt_lr import AdaptiveLearnerWrapper
     import torch
     import wandb
     from my_env import build_rlgym_v2_env
+    from util import create_trimmed_run
 
-    load_run = False
+    load_run = True
+    proj_name = "RL4RL"
     run_name = "Test3_adaptive_lr"
-    run_id = None
+    old_run_id = "1uu4xfdd"
     use_adaptive_lr = True
-    load_weights_manually = False
-    weights_dir_path = "./data/FILL_ME_IN"
+    load_weights_manually = True
+    weights_dir_path = "./data/Test3_adaptive_lr"
+    last_step = 9599
+
+    if wandb.run is not None:
+        wandb.finish()
 
     if not load_run:
-        if wandb.run is not None:
-            wandb.finish()
-        wandb_run = wandb.init(project="RL4RL", name=run_name)
+        #Creates new run from scratch
+        wandb_run = wandb.init(project=proj_name, name=run_name)
+    elif load_weights_manually:
+        #Creates a clean copy of an old run with ending removed (used when a run was killed due to GPU constraints)
+        wandb_run = create_trimmed_run(proj_name, run_name, old_run_id, last_step)
     else:
-        wandb_run = wandb.init(project="RL4RL", name=run_name, id=run_id, resume="must")
+        #Uses RLGym PPO's automatic load from checkpoint to continue from most recent checkpoint saved locally
+        #Note some training may be lost and inaccurate timesteps reported with this method
+        wandb_run = wandb.init(project=proj_name, name=run_name, id=old_run_id, resume="must")
     
     # 32 processes
     n_proc = 24 # Trying this as well

@@ -31,7 +31,7 @@ if __name__ == "__main__":
                         log_to_wandb=False, 
                         load_wandb=False).ppo_learner
 
-    agent_model.load_from("./data/Test2_IncreaseScale")
+    agent_model.load_from("./data/Test3_adaptive_lr_7k")
 
     env = build_env()
 
