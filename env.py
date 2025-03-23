@@ -10,6 +10,8 @@ def build_custom_env(team_spirit_factor, random_start_prob):
     from rlgym.rocket_league.sim import RocketSimEngine
     from rlgym.rocket_league.state_mutators import MutatorSequence, FixedTeamSizeMutator, KickoffMutator
     from rlgym.rocket_league import common_values
+    from rlgym_tools.rocket_league.state_mutators.weighted_sample_mutator import WeightedSampleMutator
+    from rlgym_tools.rocket_league.state_mutators.random_physics_mutator import RandomPhysicsMutator
     import numpy as np
 
     from reward import (SpeedTowardBallReward, InAirReward, VelocityBallToGoalReward, GoalReward, TouchReward,
@@ -28,7 +30,7 @@ def build_custom_env(team_spirit_factor, random_start_prob):
     termination_condition = GoalCondition()
     truncation_condition = AnyCondition(NoTouchTimeoutCondition(timeout_seconds=no_touch_timeout_seconds), TimeoutCondition(timeout_seconds=game_timeout_seconds))
 
-    reward_fn = CombinedReward(
+    reward_fn = TeamSpiritRewardWrapper(CombinedReward(
         (GoalReward(), 40), 
         (TouchReward(), 2),
         (SpeedTowardBallReward(), 0.5), 
@@ -40,7 +42,7 @@ def build_custom_env(team_spirit_factor, random_start_prob):
         (FaceBallReward(), 0.005),
         (BoostChangeReward(), 0.6),
         (BoostKeepReward(), 0.4)
-    )
+    ), team_spirit_factor)
 
     obs_builder = DefaultObs(zero_padding=None,
                              pos_coef=np.asarray([1 / common_values.SIDE_WALL_X, 1 / common_values.BACK_NET_Y, 1 / common_values.CEILING_Z]),
@@ -49,8 +51,10 @@ def build_custom_env(team_spirit_factor, random_start_prob):
                              ang_vel_coef=1 / common_values.CAR_MAX_ANG_VEL,
                              boost_coef=1 / 100.0,)
 
+    
     state_mutator = MutatorSequence(FixedTeamSizeMutator(blue_size=blue_team_size, orange_size=orange_team_size),
-                                    KickoffMutator())
+                                    WeightedSampleMutator([KickoffMutator(), RandomPhysicsMutator()], 
+                                                          [1-random_start_prob, random_start_prob]))
     
     rlgym_env = RLGym(
         state_mutator=state_mutator,

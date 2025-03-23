@@ -38,7 +38,8 @@ class PPO_Model:
         self.use_adaptive_lr = use_adaptive_lr
 
         self.load_weights = learning_stage != 0 or recovering_from_crash
-        self.load_weights_dir = self.latest_checkpoint_path(recovering_from_crash)
+        if self.load_weights:
+            self.load_weights_dir = self.latest_checkpoint_path(recovering_from_crash)
 
         
     def train(self):

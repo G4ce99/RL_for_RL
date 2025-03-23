@@ -4,9 +4,9 @@ from util import create_trimmed_run, most_recent_checkpoint_metadata
 
 def main():
     proj_name = "RL4RL"
-    run_name = "Test3_adaptive_lr"
-    use_adaptive_lr = False
-    recovering_from_crash = True
+    run_name = "Test3_3Stage1"
+    use_adaptive_lr = True
+    recovering_from_crash = False
     last_cumulative_step = 0
 
     if wandb.run is not None:
@@ -21,17 +21,17 @@ def main():
         wandb_run = create_trimmed_run(proj_name, run_name, old_run_id, last_step)
 
     n_proc = 24
-    model_stages = 4
-    rand_spawn_probs = [0.9, 0.5, 0.1, 0.5]
-    team_spirits = [0.0, 0.4, 0.8, 0.5]
+    model_stages = 3
+    rand_spawn_probs = [0.8, 0.5, 0.2]
+    team_spirits = [0.0, 0.0, 0.0]
 
     # NOTE: THESE MUST BE CUMULATIVE
-    timestep_limits = [300_000_000, 700_000_000, 990_500_000, 1_000_000_000] 
+    timestep_limits = [300_000_000, 700_000_000, 1_000_000_000] 
     for i in range(model_stages):
         print(f"----------STARTING STAGE: {i}----------")
         if timestep_limits[i] < last_cumulative_step:
             continue
-        
+
         model = PPO_Model(wandb_run=wandb_run,
                           cumulative_timesteps=timestep_limits[i],
                           num_process=n_proc, 
