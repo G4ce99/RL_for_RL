@@ -6,8 +6,6 @@ import io
 import wandb
 from contextlib import redirect_stdout
 
-from my_env import build_rlgym_v2_env
-
 class AdaptiveLearnerWrapper(MetricsLogger):
     """
     Notes to self: 
@@ -23,20 +21,24 @@ class AdaptiveLearnerWrapper(MetricsLogger):
     Learning rate calculated by max_lr * gamma ^ (alpha*cumulative_ts)
     Alpha and gamma set up for what I think is good distribution for 
     """
-    def __init__(self, alpha=1e-8, gamma=0.91, *args, **kwargs):
+    def __init__(self, env_builder_func, alpha=1e-8, gamma=0.91, *args, **kwargs):
         self.max_policy_lr = kwargs["policy_lr"]
         self.max_critic_lr = kwargs["critic_lr"]
         self.alpha = alpha
         self.gamma = gamma
 
-        self.learner = Learner(build_rlgym_v2_env, metrics_logger=self, **kwargs)
+        self.learner = Learner(env_builder_func, metrics_logger=self, **kwargs)
         self.learner.policy_lr, self.learner.critic_lr, self.timestep_cnt = self.initialize_from_run(kwargs["wandb_run"])
         
     def initialize_from_run(self, wandb_run):
         api = wandb.Api()
         run = api.run(f"{wandb_run.entity}/{wandb_run.project}/{wandb_run.id}")
 
-        history = pd.DataFrame(run.history(keys=["_step", "Cumulative Timesteps"]))
+        full_rows = []
+        for row in run.scan_history():
+            full_rows.append(row)
+        history = pd.DataFrame(full_rows)
+
         if not history.empty:
             timestep_cnt = history["_step"].dropna().max()+1
             cumulative_ts = history["Cumulative Timesteps"].dropna().max()

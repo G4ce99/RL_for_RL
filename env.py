@@ -1,4 +1,6 @@
-def build_env():
+# TODO: ADD SUPPORT FOR TEAMSPIRIT FACTOR AND RANDOM PROBABILITY PROBABILITY
+    
+def build_custom_env(team_spirit_factor, random_start_prob):
     from rlgym.api import RLGym
     from rlgym.rocket_league.action_parsers import LookupTableAction, RepeatAction
     from rlgym.rocket_league.done_conditions import GoalCondition, NoTouchTimeoutCondition, TimeoutCondition, AnyCondition
@@ -13,7 +15,7 @@ def build_env():
     from reward import (SpeedTowardBallReward, InAirReward, VelocityBallToGoalReward, GoalReward, TouchReward,
                         ChallengeBallReward, BallGoalDistanceReward, FaceBallReward, HitBallInAirTowardsGoalReward, AdvancedTouchReward, 
                         BoostChangeReward, BoostKeepReward, TeamSpiritRewardWrapper)
-
+    
     spawn_opponents = True
     team_size = 2
     blue_team_size = team_size
@@ -60,7 +62,3 @@ def build_env():
         transition_engine=RocketSimEngine(),
         renderer=RLViserRenderer()) #I added the last one. Lets see what happens now.
     return rlgym_env
-    
-def build_rlgym_v2_env():
-    from rlgym_ppo.util import RLGymV2GymWrapper
-    return RLGymV2GymWrapper(build_env())
